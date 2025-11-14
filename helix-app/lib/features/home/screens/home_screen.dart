@@ -19,10 +19,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = const [
-    DashboardScreen(),
+    CalendarScreen(),
     ActivitiesScreen(),
     SessionsScreen(),
-    CalendarScreen(),
+    DashboardScreen(),
   ];
 
   @override
@@ -38,9 +38,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         },
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: 'Dashboard',
+            icon: Icon(Icons.calendar_today_outlined),
+            selectedIcon: Icon(Icons.calendar_today),
+            label: 'Calendar',
           ),
           NavigationDestination(
             icon: Icon(Icons.category_outlined),
@@ -53,9 +53,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             label: 'Sessions',
           ),
           NavigationDestination(
-            icon: Icon(Icons.calendar_today_outlined),
-            selectedIcon: Icon(Icons.calendar_today),
-            label: 'Calendar',
+            icon: Icon(Icons.dashboard_outlined),
+            selectedIcon: Icon(Icons.dashboard),
+            label: 'Dashboard',
           ),
         ],
       ),
@@ -96,8 +96,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.dashboard),
-              title: const Text('Dashboard'),
+              leading: const Icon(Icons.calendar_today),
+              title: const Text('Calendar'),
               selected: _currentIndex == 0,
               onTap: () {
                 setState(() => _currentIndex = 0);
@@ -123,8 +123,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.calendar_today),
-              title: const Text('Calendar'),
+              leading: const Icon(Icons.dashboard),
+              title: const Text('Dashboard'),
               selected: _currentIndex == 3,
               onTap: () {
                 setState(() => _currentIndex = 3);

@@ -55,19 +55,32 @@ When `flutterfire configure` runs, you'll be asked:
 
 After the script completes:
 
-### Option 1: Run on Chrome (Easiest)
+### **RECOMMENDED: Option 1: Run on iOS Simulator** 🍎
+```bash
+# Open iOS Simulator
+open -a Simulator
+
+# Then run Flutter (it will auto-detect the simulator)
+cd helix-app
+flutter run
+```
+
+### Option 2: Run on Web Browser (Brave/Arc/Chrome)
+
+**If you use Brave, Arc, or other Chromium browsers:**
+```bash
+# Configure Flutter to use your browser
+./configure_browser.sh
+
+# Then run
+cd helix-app
+flutter run -d chrome  # Will use your configured browser
+```
+
+**If you have Chrome installed:**
 ```bash
 cd helix-app
 flutter run -d chrome
-```
-
-### Option 2: Run on iOS Simulator
-```bash
-# Open simulator
-open -a Simulator
-
-# Run app
-flutter run -d iphone
 ```
 
 ### Option 3: Run on Android Emulator
@@ -78,6 +91,24 @@ flutter devices
 # Run on android
 flutter run -d emulator-xxxx
 ```
+
+---
+
+## 🌐 Browser Configuration
+
+Since you use Brave or Arc instead of Chrome:
+
+**Easy way:** Use iOS Simulator (recommended for Mac - best performance)
+
+**Alternative:** Configure Flutter to use your browser:
+```bash
+./configure_browser.sh
+```
+
+This script will:
+- Detect Brave/Arc/Chrome on your Mac
+- Let you choose which to use
+- Configure Flutter automatically
 
 ---
 
@@ -150,9 +181,16 @@ dart pub global activate flutterfire_cli
 export PATH="$PATH":"$HOME/.pub-cache/bin"
 ```
 
-**Chrome doesn't open?**
+**Browser issues?**
 ```bash
-# Make sure Chrome is installed
+# Option 1: Use iOS Simulator instead (best for Mac)
+open -a Simulator
+flutter run
+
+# Option 2: Configure your preferred browser
+./configure_browser.sh
+
+# Option 3: Install Chrome if needed
 brew install --cask google-chrome
 ```
 

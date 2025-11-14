@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Monthly Activity Calendar</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8fafc;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 1px;
+            background-color: #e5e7eb;
+            border: 1px solid #e5e7eb;
+        }
+        .day-cell {
+            background-color: white;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            padding: 4px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .day-cell:hover {
+            background-color: #f3f4f6;
+        }
+        .day-number {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #4b5563;
+            align-self: flex-end;
+            margin-bottom: 4px;
+        }
+        .activity-segments {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+        .activity-segment {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            color: white;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding: 2px 0;
+        }
+        .activity-segment.coding {
+            background-color: #3b82f6;
+        }
+        .activity-segment.guitar {
+            background-color: #10b981;
+        }
+        .activity-segment.reading {
+            background-color: #f59e0b;
+        }
+        .activity-segment.exercise {
+            background-color: #ef4444;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 50;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            width: 90%;
+            max-width: 500px;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .today .day-number {
+            background-color: #3b82f6;
+            color: white;
+            border-radius: 9999px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+        .other-month .day-number {
+            color: #9ca3af;
+        }
+        .other-month {
+            background-color: #f9fafb;
+        }
+        .week-header {
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 8px 0;
+            color: #374151;
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+<div class="max-w-4xl mx-auto">
+<div class="mb-6 flex justify-center">
+<div class="bg-gray-200 p-1 rounded-lg flex space-x-1">
+<button class="px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" id="monthlyViewBtn">Month</button>
+<button class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="weeklyViewBtn">Week</button>
+</div>
+</div>
+<header class="flex items-center justify-between mb-6">
+<button class="p-2 rounded-full hover:bg-gray-200 transition-colors" id="prevMonth">
+<span class="material-icons text-gray-600">chevron_left</span>
+</button>
+<h1 class="text-xl md:text-2xl font-semibold text-gray-800" id="currentMonthYear"></h1>
+<button class="p-2 rounded-full hover:bg-gray-200 transition-colors" id="nextMonth">
+<span class="material-icons text-gray-600">chevron_right</span>
+</button>
+</header>
+<div class="calendar-grid rounded-lg overflow-hidden shadow-md">
+<div class="week-header">Mon</div>
+<div class="week-header">Tue</div>
+<div class="week-header">Wed</div>
+<div class="week-header">Thu</div>
+<div class="week-header">Fri</div>
+<div class="week-header">Sat</div>
+<div class="week-header">Sun</div>
+</div>
+</div>
+<div class="modal" id="logSessionModal">
+<div class="modal-content">
+<div class="flex justify-between items-center mb-4">
+<h2 class="text-lg font-medium text-gray-900">Log Activity for <span id="modalDate"></span></h2>
+<button class="p-1 rounded-full hover:bg-gray-200" id="closeModal">
+<span class="material-icons text-gray-500">close</span>
+</button>
+</div>
+<form id="logSessionForm">
+<div class="mb-4">
+<label class="block text-sm font-medium text-gray-700 mb-1" for="activityType">Activity Type</label>
+<select class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" id="activityType" name="activityType">
+<option value="coding">Coding</option>
+<option value="guitar">Guitar</option>
+<option value="reading">Reading</option>
+<option value="exercise">Exercise</option>
+</select>
+</div>
+<div class="mb-4">
+<label class="block text-sm font-medium text-gray-700 mb-1" for="duration">Duration (hours)</label>
+<input class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" id="duration" min="0.1" name="duration" placeholder="e.g., 1.5" step="0.1" type="number"/>
+</div>
+<div class="flex justify-end space-x-3 mt-6">
+<button class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" id="cancelLog" type="button">
+                        Cancel
+                    </button>
+<button class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" type="submit">
+                        Log Activity
+                    </button>
+</div>
+</form>
+</div>
+</div>
+<script>
+        const calendarGrid = document.querySelector('.calendar-grid');
+        const currentMonthYearEl = document.getElementById('currentMonthYear');
+        const prevMonthBtn = document.getElementById('prevMonth');
+        const nextMonthBtn = document.getElementById('nextMonth');
+        const modal = document.getElementById('logSessionModal');
+        const closeModalBtn = document.getElementById('closeModal');
+        const cancelLogBtn = document.getElementById('cancelLog');
+        const modalDateEl = document.getElementById('modalDate');
+        const logSessionForm = document.getElementById('logSessionForm');
+        let currentDate = new Date();
+        let selectedDayCell = null;
+        const activities = {};
+        function generateRandomActivities(year, month) {
+            const numDays = new Date(year, month + 1, 0).getDate();
+            for (let day = 1; day <= numDays; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                if (Math.random() < 0.7) {
+                    activities[dateStr] = [];
+                    const numActivities = Math.floor(Math.random() * 3) + 1;
+                    let totalDuration = 0;
+                    const maxTotalDayDuration = 8;
+                    for (let i = 0; i < numActivities; i++) {
+                        if (totalDuration >= maxTotalDayDuration) break;
+                        const types = ['coding', 'guitar', 'reading', 'exercise'];
+                        const randomType = types[Math.floor(Math.random() * types.length)];
+                        let randomDuration = Math.max(0.5, Math.floor((Math.random() * (maxTotalDayDuration - totalDuration)) * 2) / 2);
+                        randomDuration = Math.min(randomDuration, maxTotalDayDuration - totalDuration);
+                        if (randomDuration > 0) {
+                            activities[dateStr].push({
+                                type: randomType,
+                                duration: randomDuration
+                            });
+                            totalDuration += randomDuration;
+                        }
+                    }
+                }
+            }
+        }
+        function renderCalendar(date) {
+            calendarGrid.innerHTML = `
+                <div class="week-header">Mon</div>
+                <div class="week-header">Tue</div>
+                <div class="week-header">Wed</div>
+                <div class="week-header">Thu</div>
+                <div class="week-header">Fri</div>
+                <div class="week-header">Sat</div>
+                <div class="week-header">Sun</div>
+            `;
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const today = new Date();
+            currentMonthYearEl.textContent = date.toLocaleDateString('en-US', {
+                month: 'long',
+                year: 'numeric'
+            });
+            if (!Object.keys(activities).some(key => key.startsWith(`${year}-${String(month + 1).padStart(2, '0')}`))) {
+                generateRandomActivities(year, month);
+            }
+            const firstDayOfMonth = new Date(year, month, 1);
+            const lastDayOfMonth = new Date(year, month + 1, 0);
+            const daysInMonth = lastDayOfMonth.getDate();
+            let startingDay = firstDayOfMonth.getDay();
+            startingDay = (startingDay === 0) ? 6 : startingDay - 1;
+            for (let i = 0; i < startingDay; i++) {
+                const prevMonthDayCell = document.createElement('div');
+                prevMonthDayCell.classList.add('day-cell', 'other-month');
+                calendarGrid.appendChild(prevMonthDayCell);
+            }
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayCell = document.createElement('div');
+                dayCell.classList.add('day-cell');
+                dayCell.dataset.date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayNumber = document.createElement('span');
+                dayNumber.classList.add('day-number');
+                dayNumber.textContent = day;
+                dayCell.appendChild(dayNumber);
+                if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+                    dayCell.classList.add('today');
+                }
+                const activitySegmentsContainer = document.createElement('div');
+                activitySegmentsContainer.classList.add('activity-segments');
+                dayCell.appendChild(activitySegmentsContainer);
+                const dayActivities = activities[dayCell.dataset.date] || [];
+                const totalDayDuration = dayActivities.reduce((sum, act) => sum + act.duration, 0);
+                const maxVisualDuration = 8;
+                dayActivities.forEach(activity => {
+                    const segment = document.createElement('div');
+                    segment.classList.add('activity-segment', activity.type);
+                    const percentageHeight = totalDayDuration > 0 ? (activity.duration / Math.max(totalDayDuration, maxVisualDuration)) * 100 : 0;
+                    segment.style.height = `${Math.max(percentageHeight, activity.duration > 0 ? 5 : 0)}%`;
+                    segment.title = `${activity.type.charAt(0).toUpperCase() + activity.type.slice(1)}: ${activity.duration}h`;
+                    activitySegmentsContainer.appendChild(segment);
+                });
+                dayCell.addEventListener('click', () => openModal(dayCell.dataset.date, dayCell));
+                calendarGrid.appendChild(dayCell);
+            }
+            const totalCells = startingDay + daysInMonth;
+            const remainingCells = (7 - (totalCells % 7)) % 7;
+            for (let i = 0; i < remainingCells; i++) {
+                const nextMonthDayCell = document.createElement('div');
+                nextMonthDayCell.classList.add('day-cell', 'other-month');
+                calendarGrid.appendChild(nextMonthDayCell);
+            }
+        }
+        function openModal(dateStr, cell) {
+            selectedDayCell = cell;
+            const dateObj = new Date(dateStr + 'T00:00:00');
+            modalDateEl.textContent = dateObj.toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric'
+            });
+            modal.classList.add('active');
+            logSessionForm.reset();
+            document.getElementById('duration').focus();
+        }
+        function closeModal() {
+            modal.classList.remove('active');
+            selectedDayCell = null;
+        }
+        closeModalBtn.addEventListener('click', closeModal);
+        cancelLogBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+        logSessionForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const activityType = document.getElementById('activityType').value;
+            const duration = parseFloat(document.getElementById('duration').value);
+            if (!activityType || isNaN(duration) || duration <= 0) {
+                alert('Please enter a valid activity type and duration.');
+                return;
+            }
+            const dateStr = selectedDayCell.dataset.date;
+            if (!activities[dateStr]) {
+                activities[dateStr] = [];
+            }
+            activities[dateStr].push({
+                type: activityType,
+                duration: duration
+            });
+            renderCalendar(currentDate);
+            closeModal();
+        });
+        prevMonthBtn.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar(currentDate);
+        });
+        nextMonthBtn.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar(currentDate);
+        });
+        const monthlyViewBtn = document.getElementById('monthlyViewBtn');
+        const weeklyViewBtn = document.getElementById('weeklyViewBtn');
+        monthlyViewBtn.addEventListener('click', () => {
+            monthlyViewBtn.classList.add('bg-white', 'text-gray-700', 'shadow-sm');
+            monthlyViewBtn.classList.remove('bg-gray-200', 'text-gray-500', 'hover:bg-gray-100');
+            weeklyViewBtn.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:bg-gray-100');
+            weeklyViewBtn.classList.remove('bg-white', 'text-gray-700', 'shadow-sm');
+            // Add logic to switch to monthly view if different from current
+            console.log("Switched to Monthly View");
+        });
+        weeklyViewBtn.addEventListener('click', () => {
+            weeklyViewBtn.classList.add('bg-white', 'text-gray-700', 'shadow-sm');
+            weeklyViewBtn.classList.remove('bg-gray-200', 'text-gray-500', 'hover:bg-gray-100');
+            monthlyViewBtn.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:bg-gray-100');
+            monthlyViewBtn.classList.remove('bg-white', 'text-gray-700', 'shadow-sm');
+            // Add logic to switch to weekly view
+            console.log("Switched to Weekly View - Placeholder for actual weekly view implementation");
+            // For now, it just changes button styles. You'd implement the weekly view rendering here.
+        });
+        renderCalendar(currentDate);
+    </script>
+
+</body></html>

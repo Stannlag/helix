@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Weekly Calendar</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f7f8fc;}
+        .day-block {
+            height: 300px;transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .day-block:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        .activity-segment {
+            transition: opacity 0.2s ease-in-out;
+        }
+        .day-block:hover .activity-segment {
+            opacity: 0.85;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 50;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 24px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: #333;
+            text-decoration: none;
+        }::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #bdbdbd;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #888;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
+<header class="w-full max-w-5xl mb-8 text-center">
+<h1 class="text-3xl font-medium text-slate-700">My Week</h1>
+<div class="flex justify-center items-center mt-4">
+<button class="p-2 rounded-full hover:bg-slate-200 text-slate-600">
+<span class="material-icons-outlined">arrow_back_ios</span>
+</button>
+<p class="text-lg font-normal text-slate-600 mx-4">October 26 - November 1, 2023</p>
+<button class="p-2 rounded-full hover:bg-slate-200 text-slate-600">
+<span class="material-icons-outlined">arrow_forward_ios</span>
+</button>
+</div>
+</header>
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4 w-full max-w-5xl px-2">
+<div class="day-container cursor-pointer" onclick="openModal('Monday')">
+<div class="text-center mb-2">
+<p class="text-sm font-medium text-slate-600">MON</p>
+<p class="text-xs text-slate-400">26</p>
+</div>
+<div class="day-block bg-white rounded-lg shadow-md p-1.5 flex flex-col space-y-1 overflow-hidden">
+<div class="activity-segment bg-blue-500 rounded" style="height: 30%;"></div>
+<div class="activity-segment bg-green-500 rounded" style="height: 20%;"></div>
+<div class="activity-segment bg-purple-500 rounded" style="height: 40%;"></div>
+</div>
+</div>
+<div class="day-container cursor-pointer" onclick="openModal('Tuesday')">
+<div class="text-center mb-2">
+<p class="text-sm font-medium text-slate-600">TUE</p>
+<p class="text-xs text-slate-400">27</p>
+</div>
+<div class="day-block bg-white rounded-lg shadow-md p-1.5 flex flex-col space-y-1 overflow-hidden">
+<div class="activity-segment bg-orange-400 rounded" style="height: 50%;"></div>
+<div class="activity-segment bg-teal-500 rounded" style="height: 25%;"></div>
+</div>
+</div>
+<div class="day-container cursor-pointer" onclick="openModal('Wednesday')">
+<div class="text-center mb-2">
+<p class="text-sm font-medium text-slate-600">WED</p>
+<p class="text-xs text-slate-400">28</p>
+</div>
+<div class="day-block bg-white rounded-lg shadow-md p-1.5 flex flex-col space-y-1 overflow-hidden">
+<div class="activity-segment bg-purple-500 rounded" style="height: 60%;"></div>
+<div class="activity-segment bg-blue-300 rounded" style="height: 15%;"></div>
+</div>
+</div>
+<div class="day-container cursor-pointer" onclick="openModal('Thursday')">
+<div class="text-center mb-2">
+<p class="text-sm font-medium text-slate-600">THU</p>
+<p class="text-xs text-slate-400">29</p>
+</div>
+<div class="day-block bg-white rounded-lg shadow-md p-1.5 flex flex-col space-y-1 overflow-hidden">
+<div class="activity-segment bg-indigo-400 rounded" style="height: 20%;"></div>
+<div class="activity-segment bg-rose-400 rounded" style="height: 30%;"></div>
+</div>
+</div>
+<div class="day-container cursor-pointer" onclick="openModal('Friday')">
+<div class="text-center mb-2">
+<p class="text-sm font-medium text-slate-600">FRI</p>
+<p class="text-xs text-slate-400">30</p>
+</div>
+<div class="day-block bg-white rounded-lg shadow-md p-1.5 flex flex-col space-y-1 overflow-hidden">
+<div class="activity-segment bg-sky-500 rounded" style="height: 25%;"></div>
+</div>
+</div>
+<div class="day-container cursor-pointer" onclick="openModal('Saturday')">
+<div class="text-center mb-2">
+<p class="text-sm font-medium text-slate-600">SAT</p>
+<p class="text-xs text-slate-400">31</p>
+</div>
+<div class="day-block bg-white rounded-lg shadow-md p-1.5 flex flex-col space-y-1 overflow-hidden">
+<div class="activity-segment bg-amber-500 rounded" style="height: 40%;"></div>
+<div class="activity-segment bg-lime-500 rounded" style="height: 30%;"></div>
+</div>
+</div>
+<div class="day-container cursor-pointer" onclick="openModal('Sunday')">
+<div class="text-center mb-2">
+<p class="text-sm font-medium text-slate-600">SUN</p>
+<p class="text-xs text-slate-400">1</p>
+</div>
+<div class="day-block bg-white rounded-lg shadow-md p-1.5 flex flex-col space-y-1 overflow-hidden">
+</div>
+</div>
+</div>
+<div class="modal" id="logSessionModal">
+<div class="modal-content">
+<span class="close-button" onclick="closeModal()">×</span>
+<h2 class="text-2xl font-medium text-slate-700 mb-6" id="modalTitle">Log Session for <span id="modalDayName"></span></h2>
+<form>
+<div class="mb-4">
+<label class="block text-sm font-medium text-slate-600 mb-1" for="activityName">Activity Name</label>
+<input class="w-full p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow" id="activityName" name="activityName" placeholder="e.g., Coding Project" type="text"/>
+</div>
+<div class="mb-4">
+<label class="block text-sm font-medium text-slate-600 mb-1" for="activityDuration">Duration (hours)</label>
+<input class="w-full p-3 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow" id="activityDuration" min="0.5" name="activityDuration" placeholder="e.g., 2.5" step="0.5" type="number"/>
+</div>
+<div class="mb-6">
+<label class="block text-sm font-medium text-slate-600 mb-1" for="activityColor">Color</label>
+<select class="w-full p-3 border border-slate-300 rounded-md bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow" id="activityColor" name="activityColor">
+<option value="bg-blue-500">Blue (Coding)</option>
+<option value="bg-green-500">Green (Guitar)</option>
+<option value="bg-purple-500">Purple (Reading)</option>
+<option value="bg-orange-400">Orange (Workout)</option>
+<option value="bg-teal-500">Teal (Meditation)</option>
+<option value="bg-rose-400">Rose (Social)</option>
+</select>
+</div>
+<div class="flex justify-end">
+<button class="px-6 py-3 text-sm font-medium text-slate-600 rounded-md hover:bg-slate-200 mr-2 transition-colors" onclick="closeModal()" type="button">Cancel</button>
+<button class="px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors" type="submit">Log Session</button>
+</div>
+</form>
+</div>
+</div>
+<script>
+        const modal = document.getElementById('logSessionModal');
+        const modalDayName = document.getElementById('modalDayName');
+        function openModal(dayName) {
+            modalDayName.textContent = dayName;
+            modal.style.display = "block";
+        }
+        function closeModal() {
+            modal.style.display = "none";
+        }
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+        // Prevent form submission for demo
+        document.querySelector('#logSessionModal form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Here you would typically handle the form data
+            console.log("Form submitted (demo)");
+            closeModal();
+        });
+    </script>
+
+</body></html>

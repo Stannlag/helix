@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Helix.API", "Helix.API\Helix.API.csproj", "{18BB5C9D-5981-4FF3-A87F-C6FD628E685D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Helix.Core", "Helix.Core\Helix.Core.csproj", "{63EA3A7A-3EFA-4508-BD5F-E8E285C6A839}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Helix.Infra", "Helix.Infra\Helix.Infra.csproj", "{54B2048B-1C44-438A-BE8C-D5E60CA9ED78}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{18BB5C9D-5981-4FF3-A87F-C6FD628E685D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18BB5C9D-5981-4FF3-A87F-C6FD628E685D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18BB5C9D-5981-4FF3-A87F-C6FD628E685D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18BB5C9D-5981-4FF3-A87F-C6FD628E685D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63EA3A7A-3EFA-4508-BD5F-E8E285C6A839}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63EA3A7A-3EFA-4508-BD5F-E8E285C6A839}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63EA3A7A-3EFA-4508-BD5F-E8E285C6A839}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63EA3A7A-3EFA-4508-BD5F-E8E285C6A839}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54B2048B-1C44-438A-BE8C-D5E60CA9ED78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54B2048B-1C44-438A-BE8C-D5E60CA9ED78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54B2048B-1C44-438A-BE8C-D5E60CA9ED78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54B2048B-1C44-438A-BE8C-D5E60CA9ED78}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

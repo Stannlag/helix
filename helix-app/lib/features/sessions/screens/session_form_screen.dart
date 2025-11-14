@@ -543,6 +543,7 @@ class _SessionFormScreenState extends ConsumerState<SessionFormScreen> {
               ? null
               : _notesController.text.trim(),
           date: _selectedDate,
+          createdAt: DateTime.now(),
         );
         await sessionService.createSession(newSession);
 

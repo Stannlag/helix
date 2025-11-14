@@ -29,6 +29,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     final sessionsAsync = ref.watch(sessionsStreamProvider);
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isLargeScreen = screenHeight > 700;
 
     return Scaffold(
       appBar: AppBar(
@@ -36,24 +38,44 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         centerTitle: true,
       ),
       body: sessionsAsync.when(
-        data: (sessions) => Column(
-          children: [
-            // Toggle Week/Month
-            _buildViewToggle(),
-            const SizedBox(height: 8),
+        data: (sessions) => LayoutBuilder(
+          builder: (context, constraints) {
+            // Calculate calendar height based on screen size
+            final calendarHeight = isLargeScreen
+                ? constraints.maxHeight * 0.5  // 50% on large screens
+                : 250.0;  // Fixed 250px on small screens
 
-            // Calendar (Week or Month)
-            _isWeekView
-                ? _buildWeekView(sessions)
-                : _buildMonthView(sessions),
+            return CustomScrollView(
+              slivers: [
+                // Toggle and Calendar
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      // Toggle Week/Month
+                      _buildViewToggle(),
+                      const SizedBox(height: 8),
 
-            const Divider(height: 1),
+                      // Calendar (Week or Month)
+                      _isWeekView
+                          ? _buildWeekView(sessions, calendarHeight)
+                          : _buildMonthView(sessions),
+                    ],
+                  ),
+                ),
 
-            // Selected Day Sessions
-            Expanded(
-              child: _buildSelectedDaySessions(sessions),
-            ),
-          ],
+                // Divider
+                const SliverToBoxAdapter(
+                  child: Divider(height: 1),
+                ),
+
+                // Selected Day Sessions
+                SliverFillRemaining(
+                  hasScrollBody: true,
+                  child: _buildSelectedDaySessions(sessions),
+                ),
+              ],
+            );
+          },
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
@@ -72,10 +94,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () => _logSession(context),
-        icon: const Icon(Icons.add),
-        label: const Text('Log Session'),
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -96,7 +117,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     );
   }
 
-  Widget _buildWeekView(List<SessionModel> sessions) {
+  Widget _buildWeekView(List<SessionModel> sessions, double height) {
     final weekStart = _getWeekStart(_focusedWeek);
     final weekDays = List.generate(7, (i) => weekStart.add(Duration(days: i)));
 
@@ -134,7 +155,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
         // Week columns
         SizedBox(
-          height: 250,
+          height: height,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Row(

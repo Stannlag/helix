@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "459273318088",
+    "project_id": "helix-85674",
+    "storage_bucket": "helix-85674.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:459273318088:android:0c8fb2acd125b949403ffd",
+        "android_client_info": {
+          "package_name": "com.helix.helix"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "459273318088-ruvvhuq15qqoq80f704fn3h5sfdekpq5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAulNSBBVT1FVruUXy8Gu_r7TjKpiEZJ_E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "459273318088-ruvvhuq15qqoq80f704fn3h5sfdekpq5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

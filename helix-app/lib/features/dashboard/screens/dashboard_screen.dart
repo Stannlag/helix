@@ -52,10 +52,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
           // Calculate analytics
           final analytics = _calculateAnalytics(filteredSessions);
+          final streakData = _calculateStreak(allSessions);
 
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              // Streak card
+              _buildStreakCard(
+                streakData['currentStreak'] as int,
+                streakData['longestStreak'] as int,
+              ),
+              const SizedBox(height: 16),
+
               // Total time card
               _buildTotalTimeCard(analytics['totalMinutes'] as int),
               const SizedBox(height: 24),
@@ -131,6 +139,91 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: AppColors.textSecondary,
                   ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStreakCard(int currentStreak, int longestStreak) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          children: [
+            // Current streak
+            Expanded(
+              child: Column(
+                children: [
+                  const Icon(
+                    Icons.local_fire_department,
+                    color: Colors.orange,
+                    size: 32,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '$currentStreak',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Current Streak',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  Text(
+                    currentStreak == 1 ? 'day' : 'days',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              width: 1,
+              height: 80,
+              color: AppColors.textDisabled.withOpacity(0.3),
+            ),
+            // Longest streak
+            Expanded(
+              child: Column(
+                children: [
+                  const Icon(
+                    Icons.emoji_events,
+                    color: Colors.amber,
+                    size: 32,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '$longestStreak',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Longest Streak',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  Text(
+                    longestStreak == 1 ? 'day' : 'days',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -394,6 +487,75 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             sessionDate.isBefore(today.add(const Duration(days: 1)));
       }).toList();
     }
+  }
+
+  Map<String, int> _calculateStreak(List<SessionModel> sessions) {
+    if (sessions.isEmpty) {
+      return {'currentStreak': 0, 'longestStreak': 0};
+    }
+
+    // Get unique dates with sessions (normalized to start of day)
+    final sessionDates = sessions
+        .map((session) => DateTime(
+              session.date.year,
+              session.date.month,
+              session.date.day,
+            ))
+        .toSet()
+        .toList()
+      ..sort((a, b) => b.compareTo(a)); // Sort descending (most recent first)
+
+    // Calculate current streak
+    int currentStreak = 0;
+    final today = DateTime.now();
+    final todayNormalized = DateTime(today.year, today.month, today.day);
+
+    // Check if there's a session today or yesterday (to allow for flexibility)
+    final mostRecentSession = sessionDates.first;
+    final daysSinceLastSession = todayNormalized.difference(mostRecentSession).inDays;
+
+    if (daysSinceLastSession <= 1) {
+      // Start counting from most recent session
+      DateTime checkDate = mostRecentSession;
+
+      for (final date in sessionDates) {
+        final daysDiff = checkDate.difference(date).inDays;
+
+        if (daysDiff == 0) {
+          currentStreak++;
+          checkDate = date;
+        } else if (daysDiff == 1) {
+          currentStreak++;
+          checkDate = date;
+        } else {
+          break; // Streak broken
+        }
+      }
+    }
+
+    // Calculate longest streak
+    int longestStreak = 0;
+    int tempStreak = 1;
+
+    for (int i = 0; i < sessionDates.length - 1; i++) {
+      final daysDiff = sessionDates[i].difference(sessionDates[i + 1]).inDays;
+
+      if (daysDiff == 1) {
+        tempStreak++;
+      } else {
+        longestStreak = tempStreak > longestStreak ? tempStreak : longestStreak;
+        tempStreak = 1;
+      }
+    }
+    longestStreak = tempStreak > longestStreak ? tempStreak : longestStreak;
+
+    // Longest streak should at least be as long as current streak
+    longestStreak = longestStreak > currentStreak ? longestStreak : currentStreak;
+
+    return {
+      'currentStreak': currentStreak,
+      'longestStreak': longestStreak,
+    };
   }
 
   Map<String, dynamic> _calculateAnalytics(List<SessionModel> sessions) {

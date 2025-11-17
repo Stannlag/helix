@@ -8,6 +8,7 @@ class ActivityModel {
   final String name;
   final Color color;
   final String? goal;
+  final int? weeklyGoalMinutes; // Weekly time goal in minutes
   final DateTime createdAt;
 
   ActivityModel({
@@ -16,6 +17,7 @@ class ActivityModel {
     required this.name,
     required this.color,
     this.goal,
+    this.weeklyGoalMinutes,
     required this.createdAt,
   });
 
@@ -28,6 +30,7 @@ class ActivityModel {
       name: data['name'] as String,
       color: Color(int.parse(data['colorHex'].substring(1), radix: 16) + 0xFF000000),
       goal: data['goal'] as String?,
+      weeklyGoalMinutes: data['weeklyGoalMinutes'] as int?,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
     );
   }
@@ -39,6 +42,7 @@ class ActivityModel {
       'name': name,
       'colorHex': '#${color.value.toRadixString(16).substring(2)}',
       'goal': goal,
+      'weeklyGoalMinutes': weeklyGoalMinutes,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }
@@ -53,6 +57,7 @@ class ActivityModel {
     String? name,
     Color? color,
     String? goal,
+    int? weeklyGoalMinutes,
     DateTime? createdAt,
   }) {
     return ActivityModel(
@@ -61,6 +66,7 @@ class ActivityModel {
       name: name ?? this.name,
       color: color ?? this.color,
       goal: goal ?? this.goal,
+      weeklyGoalMinutes: weeklyGoalMinutes ?? this.weeklyGoalMinutes,
       createdAt: createdAt ?? this.createdAt,
     );
   }

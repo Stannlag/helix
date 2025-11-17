@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/activity_model.dart';
 import '../services/activity_service.dart';
@@ -19,6 +20,8 @@ class _ActivityFormScreenState extends ConsumerState<ActivityFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _goalController = TextEditingController();
+  final _hoursController = TextEditingController();
+  final _minutesController = TextEditingController();
   Color _selectedColor = AppColors.activityColors[0];
   bool _isLoading = false;
 
@@ -29,6 +32,15 @@ class _ActivityFormScreenState extends ConsumerState<ActivityFormScreen> {
       _nameController.text = widget.activity!.name;
       _goalController.text = widget.activity!.goal ?? '';
       _selectedColor = widget.activity!.color;
+
+      // Initialize weekly goal time if set
+      if (widget.activity!.weeklyGoalMinutes != null) {
+        final totalMinutes = widget.activity!.weeklyGoalMinutes!;
+        final hours = totalMinutes ~/ 60;
+        final minutes = totalMinutes % 60;
+        _hoursController.text = hours > 0 ? hours.toString() : '';
+        _minutesController.text = minutes > 0 ? minutes.toString() : '';
+      }
     }
   }
 
@@ -36,6 +48,8 @@ class _ActivityFormScreenState extends ConsumerState<ActivityFormScreen> {
   void dispose() {
     _nameController.dispose();
     _goalController.dispose();
+    _hoursController.dispose();
+    _minutesController.dispose();
     super.dispose();
   }
 
@@ -90,6 +104,68 @@ class _ActivityFormScreenState extends ConsumerState<ActivityFormScreen> {
                 prefixIcon: Icon(Icons.flag),
               ),
               maxLines: 2,
+            ),
+
+            const SizedBox(height: 24),
+
+            // Weekly Time Goal
+            Text(
+              'Weekly Time Goal (Optional)',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _hoursController,
+                    decoration: const InputDecoration(
+                      labelText: 'Hours',
+                      hintText: '0',
+                      prefixIcon: Icon(Icons.schedule),
+                      suffixText: 'h',
+                    ),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
+                    validator: (value) {
+                      if (value != null && value.isNotEmpty) {
+                        final hours = int.tryParse(value);
+                        if (hours == null || hours < 0 || hours > 168) {
+                          return 'Max 168h';
+                        }
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextFormField(
+                    controller: _minutesController,
+                    decoration: const InputDecoration(
+                      labelText: 'Minutes',
+                      hintText: '0',
+                      prefixIcon: Icon(Icons.timer),
+                      suffixText: 'min',
+                    ),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
+                    validator: (value) {
+                      if (value != null && value.isNotEmpty) {
+                        final minutes = int.tryParse(value);
+                        if (minutes == null || minutes < 0 || minutes > 59) {
+                          return 'Max 59min';
+                        }
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+              ],
             ),
 
             const SizedBox(height: 32),
@@ -173,6 +249,14 @@ class _ActivityFormScreenState extends ConsumerState<ActivityFormScreen> {
   }
 
   Widget _buildPreviewCard() {
+    // Calculate weekly goal minutes if set
+    int? weeklyGoalMinutes;
+    final hours = int.tryParse(_hoursController.text) ?? 0;
+    final minutes = int.tryParse(_minutesController.text) ?? 0;
+    if (hours > 0 || minutes > 0) {
+      weeklyGoalMinutes = (hours * 60) + minutes;
+    }
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -226,6 +310,25 @@ class _ActivityFormScreenState extends ConsumerState<ActivityFormScreen> {
                     ],
                   ),
                 ],
+                if (weeklyGoalMinutes != null) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.schedule,
+                        size: 14,
+                        color: AppColors.textSecondary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${hours}h ${minutes}min per week',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -249,6 +352,14 @@ class _ActivityFormScreenState extends ConsumerState<ActivityFormScreen> {
 
       final activityService = ref.read(activityServiceProvider);
 
+      // Calculate weekly goal minutes if set
+      int? weeklyGoalMinutes;
+      final hours = int.tryParse(_hoursController.text) ?? 0;
+      final minutes = int.tryParse(_minutesController.text) ?? 0;
+      if (hours > 0 || minutes > 0) {
+        weeklyGoalMinutes = (hours * 60) + minutes;
+      }
+
       if (widget.activity != null) {
         // Update existing activity
         final updatedActivity = widget.activity!.copyWith(
@@ -257,6 +368,7 @@ class _ActivityFormScreenState extends ConsumerState<ActivityFormScreen> {
           goal: _goalController.text.trim().isEmpty
               ? null
               : _goalController.text.trim(),
+          weeklyGoalMinutes: weeklyGoalMinutes,
         );
         await activityService.updateActivity(updatedActivity);
 
@@ -278,6 +390,7 @@ class _ActivityFormScreenState extends ConsumerState<ActivityFormScreen> {
           goal: _goalController.text.trim().isEmpty
               ? null
               : _goalController.text.trim(),
+          weeklyGoalMinutes: weeklyGoalMinutes,
           createdAt: DateTime.now(),
         );
         await activityService.createActivity(newActivity);
